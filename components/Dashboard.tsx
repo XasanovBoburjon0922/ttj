@@ -40,7 +40,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://nbtuit.pythonanywhere.com/api/v1/auth/students/');
+        const response = await axios.get('https://nbtuit.pythonanywhere.com/auth/students/');
         setStudents(response.data);
       } catch (error) {
         console.error('Error fetching students:', error);

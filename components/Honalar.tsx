@@ -79,7 +79,6 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
                     setAttendanceIdMap(newAttendanceIdMap);
                 })
                 .catch(error => console.error('Error fetching attendance IDs:', error));
-            
         }
     }, [selectedRoom, group, setStudents]);
 
