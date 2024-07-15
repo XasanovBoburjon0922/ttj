@@ -1,4 +1,3 @@
-// src/i18n.ts
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -14,6 +13,14 @@ const resources = {
       "Attendance": "Yo'qlama",
       "Logout": "Chiqish",
       "Username": "Foydalanuvchi",
+      "Create Group": "Guruh yaratish",
+      "Group Name": "Guruh nomi",
+      "Teacher": "O'qituvchi",
+      "Select a Teacher": "O'qituvchini tanlang",
+      "Education Form": "Ta'lim shakli",
+      "Daytime": "Kunduzgi",
+      "Evening": "Kechki",
+      "Remote": "Masofaviy",
     },
   },
   rus: {
@@ -27,6 +34,14 @@ const resources = {
       "Attendance": "Посещаемость",
       "Logout": "Выход",
       "Username": "Пользователь",
+      "Create Group": "Создать группу",
+      "Group Name": "Название группы",
+      "Teacher": "Учитель",
+      "Select a Teacher": "Выберите учителя",
+      "Education Form": "Форма обучения",
+      "Daytime": "Дневное",
+      "Evening": "Вечернее",
+      "Remote": "Дистанционное",
     },
   },
   eng: {
@@ -40,6 +55,14 @@ const resources = {
       "Attendance": "Attendance",
       "Logout": "Logout",
       "Username": "Username",
+      "Create Group": "Create Group",
+      "Group Name": "Group Name",
+      "Teacher": "Teacher",
+      "Select a Teacher": "Select a Teacher",
+      "Education Form": "Education Form",
+      "Daytime": "Daytime",
+      "Evening": "Evening",
+      "Remote": "Remote",
     },
   },
 };

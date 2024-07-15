@@ -37,7 +37,7 @@ const LoginDesayn: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
       phone: loginPhone
     };
     try {
-      axios.post(`https://nbtuit.pythonanywhere.com/api/v1/auth/login/`, data).then(res => {
+      axios.post(`https://nbtuit.pythonanywhere.com/auth/login/`, data).then(res => {
         console.log(res);
         
         window.localStorage.setItem("token", res.data.tokens.access);

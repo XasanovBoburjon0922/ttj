@@ -1,6 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Button, Modal, Box, TextField, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import {
+    Button,
+    Modal,
+    Box,
+    TextField,
+    MenuItem,
+    Select,
+    InputLabel,
+    FormControl,
+    Table,
+    TableContainer,
+    TableHead,
+    TableBody,
+    TableCell,
+    TableRow,
+    Paper,
+} from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 interface Group {
     id: number;
@@ -28,6 +45,7 @@ const modalStyle = {
 };
 
 function CreateGroup() {
+    const { t } = useTranslation();
     const [groups, setGroups] = useState<Group[]>([]);
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [name, setName] = useState<string>('');
@@ -84,26 +102,26 @@ function CreateGroup() {
     const handleClose = () => setOpen(false);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <div>{t('Loading...')}</div>;
     }
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return <div>{t('Error')}: {error}</div>;
     }
 
     return (
         <div>
             <div className='flex justify-end'>
                 <Button variant="contained" color="primary" onClick={handleOpen}>
-                    Guruh yaratish
+                    {t('Create Group')}
                 </Button>
             </div>
             <Modal open={open} onClose={handleClose}>
                 <Box sx={modalStyle}>
-                    <h2>Guruh yaratish</h2>
+                    <h2>{t('Create Group')}</h2>
                     <form onSubmit={createGroup}>
                         <TextField
-                            label="Guruh nomi"
+                            label={t("Group Name")}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
@@ -111,7 +129,7 @@ function CreateGroup() {
                             margin="normal"
                         />
                         <FormControl fullWidth margin="normal">
-                            <InputLabel id="teacher-label">O'qituvchi</InputLabel>
+                            <InputLabel id="teacher-label">{t("Teacher")}</InputLabel>
                             <Select
                                 labelId="teacher-label"
                                 value={teacher}
@@ -119,7 +137,7 @@ function CreateGroup() {
                                 required
                             >
                                 <MenuItem value={0} disabled>
-                                    O'qituvchi tanlash
+                                    {t('Select a Teacher')}
                                 </MenuItem>
                                 {employees.map((employee) => (
                                     <MenuItem key={employee.id} value={employee.id}>
@@ -129,33 +147,53 @@ function CreateGroup() {
                             </Select>
                         </FormControl>
                         <FormControl fullWidth margin="normal">
-                            <InputLabel id="edu-form-label">Talaba shakli</InputLabel>
+                            <InputLabel id="edu-form-label">{t("Education Form")}</InputLabel>
                             <Select
                                 labelId="edu-form-label"
                                 value={eduForm}
                                 onChange={(e) => setEduForm(e.target.value)}
                                 required
                             >
-                                <MenuItem value="daytime">Kunduzgi</MenuItem>
-                                <MenuItem value="evening">Kechki</MenuItem>
-                                <MenuItem value="remote">Masofaviy</MenuItem>
-                                <MenuItem value="correspondence">Sirtqi</MenuItem>
+                                <MenuItem value="daytime">{t('Daytime')}</MenuItem>
+                                <MenuItem value="evening">{t('Evening')}</MenuItem>
+                                <MenuItem value="remote">{t('Remote')}</MenuItem>
+                                <MenuItem value="correspondence">{t('Correspondence')}</MenuItem>
                             </Select>
                         </FormControl>
                         <Button type="submit" variant="contained" color="primary" fullWidth>
-                            Guruh yaratish
+                            {t('Create Group')}
                         </Button>
                     </form>
                 </Box>
             </Modal>
-            <h2 className='mb-4'>Guruhlar:</h2>
-            <ul>
-                {groups.map((group) => (
-                    <li key={group.id}>
-                        <strong>{group.name}</strong> (Xodim ID: {group.teacher}, Talim shakli: {group.edu_form})
-                    </li>
-                ))}
-            </ul>
+
+            <h2 className='my-[20px]'>{t('Groups')}</h2>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell><strong>{t('Group Name')}</strong></TableCell>
+                            <TableCell><strong>{t('Teacher')}</strong></TableCell>
+                            <TableCell><strong>{t('Education Form')}</strong></TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {groups.map((group) => (
+                            <TableRow key={group.id}>
+                                <TableCell>{group.name}</TableCell>
+                                <TableCell>{employees.find((employee) => employee.id === group.teacher)?.first_name}</TableCell>
+                                <TableCell>
+                                    {group.edu_form === 'daytime' ? t('Daytime') :
+                                        group.edu_form === 'evening' ? t('Evening') :
+                                            group.edu_form === 'remote' ? t('Remote') :
+                                                group.edu_form === 'correspondence' ? t('Correspondence') :
+                                                    ''}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </div>
     );
 }

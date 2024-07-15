@@ -28,7 +28,13 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
     const [password, setPassword] = useState('');
     const [firstName, setFirstName] = useState('');
     const [apartment, setApartment] = useState('');
-    const [group, setGroup] = useState(''); 
+    const [group, setGroup] = useState<any | any[]>([]); // Assuming the group structure matches your needs
+    const [selectedGroup, setSelectedGroup] = useState(''); // State for selected group
+
+    console.log(group);
+    console.log(students);
+
+
 
 
     const [addStudentRoomModalOpen, setAddStudentRoomModalOpen] = useState(false);
@@ -52,6 +58,15 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
     }, []);
 
     useEffect(() => {
+        axios.get('http://nbtuit.pythonanywhere.com/api/v1/common/group/list/')
+            .then(response => {
+                setGroup(response.data.results); // Assuming response.data is an array of groups
+            })
+            .catch(error => {
+                console.error('Error fetching groups:', error);
+            });
+    }, []);
+    useEffect(() => {
         if (selectedFloor) {
             axios.get(`https://nbtuit.pythonanywhere.com/api/v1/common/room-list/${selectedFloor}/`)
                 .then(response => {
@@ -65,11 +80,11 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
 
     useEffect(() => {
         if (selectedRoom) {
-            axios.get(`https://nbtuit.pythonanywhere.com/api/v1/auth/students/${selectedRoom}/?group=${group}`) // Updated URL
+            axios.get(`https://nbtuit.pythonanywhere.com/api/v1/auth/students/${selectedRoom}/?group=${selectedGroup}`) // Updated URL
                 .then(response => setStudents(response.data))
                 .catch(error => console.error('Error fetching students:', error));
 
-                axios.get(`https://nbtuit.pythonanywhere.com/api/v1/common/attendance/date/`)
+            axios.get(`https://nbtuit.pythonanywhere.com/api/v1/common/attendance/date/`)
                 .then(response => {
                     const attendanceData: { student: string; id: string; }[] = response.data; // Adjust type according to your API response
                     const newAttendanceIdMap: Record<string, string> = {};
@@ -80,7 +95,8 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
                 })
                 .catch(error => console.error('Error fetching attendance IDs:', error));
         }
-    }, [selectedRoom, group, setStudents]);
+    }, [selectedRoom, selectedGroup, setStudents]);
+
 
     useEffect(() => {
         if (selectedFloorForApartment) {
@@ -118,14 +134,14 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
         const updatedAttendance = { ...attendance, [key]: value };
 
         const newAttendance = {
-            group,
+            group: selectedGroup,
             student: studentId,
             is_available: value,
             apartment: selectedRoom,
             student_name: students.find(student => student.id === studentId)?.first_name,
             room_name: rooms.find(room => room.id === selectedRoom)?.name,
         };
-console.log(newAttendance);
+        console.log(newAttendance);
 
         const attendanceId = attendanceIdMap[studentId];
         if (attendanceId) {
@@ -165,6 +181,7 @@ console.log(newAttendance);
         setPassword('');
         setFirstName('');
         setApartment('');
+        setSelectedGroup('')
     };
     const handleAddStudentModalClose = () => {
         setAddStudentModalOpen(false);
@@ -172,6 +189,7 @@ console.log(newAttendance);
         setPassword('');
         setFirstName('');
         setApartment('');
+        setSelectedGroup('');
         setSelectedFloorForApartment('');
         setRoomsForApartment([]);
     };
@@ -183,13 +201,14 @@ console.log(newAttendance);
     const handleAddStudentRoomModalClose = () => {
         setAddStudentRoomModalOpen(false);
     };
+    console.log(group);
 
     const handleAddStudent = () => {
-        const newStudent = { phone, password, first_name: firstName, apartment: selectedRoom, group }; // Include group
+        const newStudent = { phone, password, first_name: firstName, apartment: selectedRoom, group: selectedGroup }; // Include selectedGroup
 
         axios.post('https://nbtuit.pythonanywhere.com/api/v1/auth/create/student/', newStudent)
             .then(response => {
-                axios.get(`https://nbtuit.pythonanywhere.com/api/v1/auth/students/${selectedRoom}/?group=${group}`) // Updated URL
+                axios.get(`https://nbtuit.pythonanywhere.com/api/v1/auth/students/${selectedRoom}/?group=${selectedGroup}`) // Updated URL
                     .then(response => {
                         setStudents(response.data);
                     })
@@ -199,11 +218,17 @@ console.log(newAttendance);
 
                 handleAddStudentModalClose();
                 setAddStudentRoomModalOpen(false);
+
             })
             .catch(error => {
                 console.error('Error creating student:', error);
             });
     };
+    const groupMap = group.reduce((acc: { [x: string]: any; }, grp: { id: string | number; name: any; }) => {
+        acc[grp.id] = grp.name;
+        return acc;
+    }, {});
+    
     const modalStyle = {
         position: 'absolute' as 'absolute',
         top: '50%',
@@ -215,6 +240,7 @@ console.log(newAttendance);
         boxShadow: 24,
         p: 4,
     };
+
     return (
         <Box>
             {!selectedFloor && (
@@ -277,6 +303,7 @@ console.log(newAttendance);
                                     <th>id</th>
                                     <th>Ism Familya</th>
                                     <th>Telefon raqami</th>
+                                    <th>Guruhi</th>
                                     <th>Kunlikni O'zgartirish</th>
                                 </tr>
                             </thead>
@@ -286,6 +313,7 @@ console.log(newAttendance);
                                         <td className='text-center'>{index + 1}</td>
                                         <td className='text-center'>{student.first_name}</td>
                                         <td className='text-center'>{student.phone}</td>
+                                        <td className='text-center'>{groupMap[student.group]}</td> {/* Display group name */}
                                         <td className='text-center'>
                                             <Button
                                                 className='ml-[10px] w-[20px] h-[20px] border-2 border-gray-300'
@@ -345,6 +373,20 @@ console.log(newAttendance);
                         <TextField type='tel' maxRows={13} label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} fullWidth />
                         <TextField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth />
                         <TextField label="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} fullWidth />
+                        <FormControl fullWidth variant="outlined" margin="normal">
+                            <InputLabel id="group-label-add-student">Guruhni tanlang</InputLabel>
+                            <Select
+                                labelId="group-label-add-student"
+                                id="group-select-add-student"
+                                value={selectedGroup}
+                                onChange={e => setSelectedGroup(e.target.value)}
+                                label="Guruhni tanlang"
+                            >
+                                {group.map((item:any) => (
+                                    <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                         <Button onClick={handleAddStudentRoomModalOpen}>Select Room</Button>
                         <Typography variant="subtitle1">
                             Selected Room: {rooms.find(room => room.id === selectedRoom)?.name}
@@ -370,7 +412,7 @@ console.log(newAttendance);
                                 onChange={(e) => setSelectedFloorForApartment(e.target.value)}
                             >
                                 {floors.map(floor => (
-                                    <MenuItem key={floor.id} value={floor.id}>
+                                    <MenuItem key={floor.id}>
                                         {floor.name}
                                     </MenuItem>
                                 ))}
@@ -427,6 +469,20 @@ console.log(newAttendance);
                             fullWidth
                             margin="normal"
                         />
+                        <FormControl fullWidth variant="outlined" margin="normal">
+                            <InputLabel id="group-label-add-student">Guruhni tanlang</InputLabel>
+                            <Select
+                                labelId="group-label-add-student"
+                                id="group-select-add-student"
+                                value={selectedGroup}
+                                onChange={e => setSelectedGroup(e.target.value)}
+                                label="Guruhni tanlang"
+                            >
+                                {group.map((item:any) => (
+                                    <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </Box>
                     <Box sx={{ mt: 2 }}>
                         <Button disabled={!phone || !password || !firstName || !selectedRoom || students.length >= 6} variant="contained" color="primary" onClick={handleAddStudent}>Add Student</Button>
