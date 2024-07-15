@@ -69,16 +69,17 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
                 .then(response => setStudents(response.data))
                 .catch(error => console.error('Error fetching students:', error));
 
-            axios.get(`https://nbtuit.pythonanywhere.com/api/v1/common/attendance/date/`)
+                axios.get(`https://nbtuit.pythonanywhere.com/api/v1/common/attendance/date/`)
                 .then(response => {
-                    const attendanceData = response.data;
-                    const newAttendanceIdMap = {};
-                    attendanceData.forEach((item: any) => {
+                    const attendanceData: { student: string; id: string; }[] = response.data; // Adjust type according to your API response
+                    const newAttendanceIdMap: Record<string, string> = {};
+                    attendanceData.forEach((item) => {
                         newAttendanceIdMap[item.student] = item.id;
                     });
                     setAttendanceIdMap(newAttendanceIdMap);
                 })
                 .catch(error => console.error('Error fetching attendance IDs:', error));
+            
         }
     }, [selectedRoom, group, setStudents]);
 
