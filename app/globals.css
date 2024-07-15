@@ -67,3 +67,9 @@ element .style{
 :where(.css-dev-only-do-not-override-98ntnt).ant-layout.ant-layout-has-sider {
     flex-direction: column !important;
 }
+.css-dev-only-do-not-override-98ntnt{
+    flex-direction: column !important;
+}
+.css-98ntnt{
+    flex-direction: column !important;
+}
