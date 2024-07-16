@@ -228,7 +228,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
         acc[grp.id] = grp.name;
         return acc;
     }, {});
-    
+
     const modalStyle = {
         position: 'absolute' as 'absolute',
         top: '50%',
@@ -313,15 +313,21 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
                                         <td className='text-center'>{index + 1}</td>
                                         <td className='text-center'>{student.first_name}</td>
                                         <td className='text-center'>{student.phone}</td>
-                                        <td className='text-center'>{groupMap[student.group]}</td> {/* Display group name */}
+                                        <td className='text-center'>{groupMap[student.group]}</td>
+
                                         <td className='text-center'>
                                             <Button
                                                 className='ml-[10px] w-[20px] h-[20px] border-2 border-gray-300'
                                                 onClick={() => handleAttendanceChange(student.id)}
                                                 style={{ display: 'inline-block' }}
+                                                disabled={attendanceIdMap[student.id] === undefined}
                                             >
-                                                {handleAttendanceText(student.id)}
+                                                {attendanceIdMap[student.id] === undefined ? <LockOutlined />
+                                                    : handleAttendanceText(student.id)
+                                                }
                                             </Button>
+
+
                                         </td>
                                     </tr>
                                 ))}
@@ -382,7 +388,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
                                 onChange={e => setSelectedGroup(e.target.value)}
                                 label="Guruhni tanlang"
                             >
-                                {group.map((item:any) => (
+                                {group.map((item: any) => (
                                     <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
                                 ))}
                             </Select>
@@ -478,7 +484,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
                                 onChange={e => setSelectedGroup(e.target.value)}
                                 label="Guruhni tanlang"
                             >
-                                {group.map((item:any) => (
+                                {group.map((item: any) => (
                                     <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
                                 ))}
                             </Select>
