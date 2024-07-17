@@ -77,6 +77,7 @@ const Dashboard: React.FC = () => {
 
   const handleLogout = () => {
     window.localStorage.removeItem('token');
+    window.localStorage.removeItem('role');
     window.localStorage.removeItem('username');
     window.location.reload();
   };
@@ -207,7 +208,7 @@ const Dashboard: React.FC = () => {
     <ThemeProvider theme={theme}>
       <div className=' h-[100vh] flex flex-col' style={{ background: theme.palette.background.default, color: theme.palette.text.primary }}>
         <div className='px-[23px] flex justify-between items-center shadow-2xl mb-[1px] shadow-gray-500'>
-          <div className='flex items-center'>
+          <div className='flex flex-col'>
             <a href='#' className='flex items-center gap-[20px]'>
               <img src="/Logotip.png" alt="Logo" />
               <h2 className='font-bold text-gray-700'>TUIT NF</h2>
