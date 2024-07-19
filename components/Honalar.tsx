@@ -33,6 +33,8 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
 
     console.log(group);
     console.log(students);
+    console.log(attendance);
+    
 
 
 
@@ -97,6 +99,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
         }
     }, [selectedRoom, selectedGroup, setStudents]);
 
+console.log(students);
 
     useEffect(() => {
         if (selectedFloorForApartment) {
@@ -314,7 +317,6 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
                                         <td className='text-center'>{student.first_name}</td>
                                         <td className='text-center'>{student.phone}</td>
                                         <td className='text-center'>{groupMap[student.group]}</td>
-
                                         <td className='text-center'>
                                             <Button
                                                 className='ml-[10px] w-[20px] h-[20px] border-2 border-gray-300'
