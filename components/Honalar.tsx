@@ -57,15 +57,6 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
     }, []);
 
     useEffect(() => {
-        axios.get('https://nbtuit.pythonanywhere.com/api/v1/common/group/list/')
-            .then(response => {
-                setGroups(response.data.results); // Assuming response.data is an array of groups
-            })
-            .catch(error => {
-                console.error('Error fetching groups:', error);
-            });
-    }, []);
-    useEffect(() => {
         if (selectedFloor) {
             axios.get(`https://nbtuit.pythonanywhere.com/api/v1/common/room-list/${selectedFloor}/`)
                 .then(response => {
