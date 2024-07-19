@@ -83,12 +83,12 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
                 .then(response => setStudents(response.data))
                 .catch(error => console.error('Error fetching students:', error));
 
-            axios.get(`https://nbtuit.pythonanywhere.com/api/v1/common/attendance/date/?apartment=${selectedRoom}&date=${getCurrentDate()}`)
+                axios.get(`https://nbtuit.pythonanywhere.com/api/v1/common/attendance/date/?apartment=${selectedRoom}&date=${getCurrentDate()}`)
                 .then(response => {
-                    const attendanceData: { student: string; id: string; }[] = response.data; // Adjust type according to your API response
-                    const newAttendanceIdMap: Record<string, string> = {};
+                    const attendanceData: { student: string; id: string; is_available: boolean }[] = response.data;
+                    const newAttendanceIdMap: Record<string, boolean> = {}; // Changed to boolean
                     attendanceData.forEach((item) => {
-                        newAttendanceIdMap[item.student] = item.id;
+                        newAttendanceIdMap[item.student] = item.is_available; // Use is_available
                     });
                     setAttendanceIdMap(newAttendanceIdMap);
                 })
@@ -128,10 +128,11 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
         // Retrieve current attendance status from the state
         const key = `${selectedFloor}-${selectedRoom}-${studentId}`;
         const currentStatus = attendance[key] || null;
-
+    
         // Set selected student and current attendance status
         setSelectedStudent(studentId);
         setModalOpen(true);
+    
         // Set the current status in a local state for the modal
         setAttendanceStatus(currentStatus);
     };
@@ -140,7 +141,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
     const handleAttendanceSelect = (studentId: any, value: boolean | null) => {
         const key = `${selectedFloor}-${selectedRoom}-${studentId}`;
         const updatedAttendance = { ...attendance, [key]: value };
-
+    
         const newAttendance = {
             group: groups.find((group: any) => group.id === selectedGroup)?.name,
             student: studentId,
@@ -149,7 +150,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
             student_name: students.find(student => student.id === studentId)?.first_name,
             room_name: rooms.find(room => room.id === selectedRoom)?.name,
         };
-
+    
         const attendanceId = attendanceIdMap[studentId];
         if (attendanceId) {
             axios.patch(`https://nbtuit.pythonanywhere.com/api/v1/common/attendance/${attendanceId}/`, newAttendance)
@@ -166,14 +167,18 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
 
 
     const handleAttendanceText = (studentId: any) => {
-        const key = `${selectedFloor}-${selectedRoom}-${studentId}`;
-        if (attendance[key] === false) {
+        // Retrieve the attendance status from the attendanceIdMap
+        const status = attendanceIdMap[studentId];
+    
+        // Check and return the appropriate icon based on the status
+        if (status === false) {
             return <CloseOutlined style={{ color: 'red' }} />;
-        } else if (attendance[key] === true) {
+        } else if (status === true) {
             return <CheckOutlined style={{ color: 'green' }} />;
         }
         return <div style={{ width: '20px', height: '20px', border: '2px solid gray' }} />;
     };
+    
     const handleAddStudentModalOpen = () => {
         setAddStudentModalOpen(true);
     };
