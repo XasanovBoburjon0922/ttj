@@ -39,6 +39,8 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
     const [roomsForApartment, setRoomsForApartment] = useState<any[]>([]);
 
     const [attendanceIdMap, setAttendanceIdMap] = useState<any>({});
+    const [attendanceStatus, setAttendanceStatus] = useState<boolean | null>(null);
+
     useEffect(() => {
         axios.get('https://nbtuit.pythonanywhere.com/api/v1/common/floor-list/')
             .then(response => {
@@ -81,7 +83,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
                 .then(response => setStudents(response.data))
                 .catch(error => console.error('Error fetching students:', error));
 
-                axios.get(`https://nbtuit.pythonanywhere.com/api/v1/common/attendance/date/?apartment=${selectedRoom}&date=${getCurrentDate()}`)
+            axios.get(`https://nbtuit.pythonanywhere.com/api/v1/common/attendance/date/?apartment=${selectedRoom}&date=${getCurrentDate()}`)
                 .then(response => {
                     const attendanceData: { student: string; id: string; }[] = response.data; // Adjust type according to your API response
                     const newAttendanceIdMap: Record<string, string> = {};
@@ -123,9 +125,17 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
     };
 
     const handleAttendanceChange = (studentId: any) => {
+        // Retrieve current attendance status from the state
+        const key = `${selectedFloor}-${selectedRoom}-${studentId}`;
+        const currentStatus = attendance[key] || null;
+
+        // Set selected student and current attendance status
         setSelectedStudent(studentId);
         setModalOpen(true);
+        // Set the current status in a local state for the modal
+        setAttendanceStatus(currentStatus);
     };
+
 
     const handleAttendanceSelect = (studentId: any, value: boolean | null) => {
         const key = `${selectedFloor}-${selectedRoom}-${studentId}`;
@@ -139,14 +149,12 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
             student_name: students.find(student => student.id === studentId)?.first_name,
             room_name: rooms.find(room => room.id === selectedRoom)?.name,
         };
-        console.log(newAttendance);
 
         const attendanceId = attendanceIdMap[studentId];
         if (attendanceId) {
             axios.patch(`https://nbtuit.pythonanywhere.com/api/v1/common/attendance/${attendanceId}/`, newAttendance)
                 .then(() => {
                     setAttendance(updatedAttendance);
-                    localStorage.setItem('attendance', JSON.stringify(updatedAttendance));
                     setModalOpen(false);
                 })
                 .catch(error => console.error('Error updating attendance:', error));
@@ -155,6 +163,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
         }
         setModalOpen(false);
     };
+
 
     const handleAttendanceText = (studentId: any) => {
         const key = `${selectedFloor}-${selectedRoom}-${studentId}`;
@@ -358,16 +367,31 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
                         Select Attendance
                     </Typography>
                     <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-around' }}>
-                        <Button variant="contained" color="primary" onClick={() => handleAttendanceSelect(selectedStudent, true)} startIcon={<CheckOutlined />}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleAttendanceSelect(selectedStudent, true)}
+                            startIcon={<CheckOutlined />}
+                            disabled={attendanceStatus === true}
+                        >
                             Bor
                         </Button>
-                        <Button variant="contained" color="secondary" onClick={() => handleAttendanceSelect(selectedStudent, false)} startIcon={<CloseOutlined />}>
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={() => handleAttendanceSelect(selectedStudent, false)}
+                            startIcon={<CloseOutlined />}
+                            disabled={attendanceStatus === false}
+                        >
                             Yo'q
                         </Button>
-                        <Button variant="outlined" onClick={() => handleAttendanceSelect(selectedStudent, null)}>Cancel</Button>
+                        <Button variant="outlined" onClick={() => handleAttendanceSelect(selectedStudent, null)}>
+                            Cancel
+                        </Button>
                     </Box>
                 </Box>
             </Modal>
+
             <Modal open={addStudentModalOpen} onClose={handleAddStudentModalClose}>
                 <Box sx={modalStyle}>
                     <Typography variant="h6" component="h2">
