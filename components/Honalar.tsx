@@ -318,8 +318,6 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
                                                     : handleAttendanceText(student.id)
                                                 }
                                             </Button>
-
-
                                         </td>
                                     </tr>
                                 ))}
