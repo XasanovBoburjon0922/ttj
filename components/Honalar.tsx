@@ -80,7 +80,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
 
     useEffect(() => {
         if (selectedRoom) {
-            axios.get(`https://nbtuit.pythonanywhere.com/api/v1/auth/students/${selectedRoom}/?group=${selectedGroup}`) // Updated URL
+            axios.get(`https://nbtuit.pythonanywhere.com/api/v1/users/students/${selectedRoom}/?group=${selectedGroup}`) // Updated URL
                 .then(response => setStudents(response.data))
                 .catch(error => console.error('Error fetching students:', error));
 
@@ -206,9 +206,9 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
     const handleAddStudent = () => {
         const newStudent = { phone, password, first_name: firstName, apartment: selectedRoom, group: selectedGroup }; // Include selectedGroup
 
-        axios.post('https://nbtuit.pythonanywhere.com/api/v1/auth/create/student/', newStudent)
+        axios.post('https://nbtuit.pythonanywhere.com/api/v1/users/create/student/', newStudent)
             .then(response => {
-                axios.get(`https://nbtuit.pythonanywhere.com/api/v1/auth/students/${selectedRoom}/?group=${selectedGroup}`) // Updated URL
+                axios.get(`https://nbtuit.pythonanywhere.com/api/v1/users/students/${selectedRoom}/?group=${selectedGroup}`) // Updated URL
                     .then(response => {
                         setStudents(response.data);
                     })
