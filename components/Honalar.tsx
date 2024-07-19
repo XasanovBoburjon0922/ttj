@@ -7,12 +7,6 @@ interface Props {
     students: any[];
     setStudents: React.Dispatch<React.SetStateAction<any[]>>;
 }
-const formatDate = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-};
 const Attendance: React.FC<Props> = ({ students, setStudents }) => {
     const [selectedFloor, setSelectedFloor] = useState<any | null>(null);
     const [selectedRoom, setSelectedRoom] = useState<any | null>(null);
@@ -28,18 +22,11 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
     const [password, setPassword] = useState('');
     const [firstName, setFirstName] = useState('');
     const [apartment, setApartment] = useState('');
-    const [group, setGroup] = useState<any | any[]>([]); // Assuming the group structure matches your needs
+    const [groups, setGroups] = useState<any | any[]>([]); // Assuming the group structure matches your needs
     const [selectedGroup, setSelectedGroup] = useState(''); // State for selected group
 
-    console.log(group);
-    console.log(students);
-    console.log(attendance);
-    
-
-
-
-
     const [addStudentRoomModalOpen, setAddStudentRoomModalOpen] = useState(false);
+    const [addStudentGroupModalOpen, setAddStudentGroupModalOpen] = useState(false);
     const [selectedFloorForApartment, setSelectedFloorForApartment] = useState('');
     const [roomsForApartment, setRoomsForApartment] = useState<any[]>([]);
 
@@ -62,7 +49,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
     useEffect(() => {
         axios.get('http://nbtuit.pythonanywhere.com/api/v1/common/group/list/')
             .then(response => {
-                setGroup(response.data.results); // Assuming response.data is an array of groups
+                setGroups(response.data.results); // Assuming response.data is an array of groups
             })
             .catch(error => {
                 console.error('Error fetching groups:', error);
@@ -99,7 +86,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
         }
     }, [selectedRoom, selectedGroup, setStudents]);
 
-console.log(students);
+    console.log(students);
 
     useEffect(() => {
         if (selectedFloorForApartment) {
@@ -137,7 +124,7 @@ console.log(students);
         const updatedAttendance = { ...attendance, [key]: value };
 
         const newAttendance = {
-            group: selectedGroup,
+            group: groups.find((group: any) => group.id === selectedGroup)?.name,
             student: studentId,
             is_available: value,
             apartment: selectedRoom,
@@ -158,6 +145,7 @@ console.log(students);
         } else {
             console.error('Attendance ID not found for student:', studentId);
         }
+        setModalOpen(false);
     };
 
     const handleAttendanceText = (studentId: any) => {
@@ -166,12 +154,9 @@ console.log(students);
             return <CloseOutlined style={{ color: 'red' }} />;
         } else if (attendance[key] === true) {
             return <CheckOutlined style={{ color: 'green' }} />;
-        } else if (attendance[key] === null) {
-            return <LockOutlined />;
         }
         return <div style={{ width: '20px', height: '20px', border: '2px solid gray' }} />;
     };
-
     const handleAddStudentModalOpen = () => {
         setAddStudentModalOpen(true);
     };
@@ -183,16 +168,16 @@ console.log(students);
         setPhone('');
         setPassword('');
         setFirstName('');
-        setApartment('');
         setSelectedGroup('')
+        setApartment('');
     };
     const handleAddStudentModalClose = () => {
         setAddStudentModalOpen(false);
         setPhone('');
         setPassword('');
         setFirstName('');
-        setApartment('');
         setSelectedGroup('');
+        setApartment('');
         setSelectedFloorForApartment('');
         setRoomsForApartment([]);
     };
@@ -200,11 +185,16 @@ console.log(students);
     const handleAddStudentRoomModalOpen = () => {
         setAddStudentRoomModalOpen(true);
     };
+    const handleAddStudentGroupModalOpen = () => {
+        setAddStudentGroupModalOpen(true);
+    };
 
     const handleAddStudentRoomModalClose = () => {
         setAddStudentRoomModalOpen(false);
     };
-    console.log(group);
+    const handleAddStudentGroupModalClose = () => {
+        setAddStudentGroupModalOpen(false);
+    };
 
     const handleAddStudent = () => {
         const newStudent = { phone, password, first_name: firstName, apartment: selectedRoom, group: selectedGroup }; // Include selectedGroup
@@ -227,7 +217,7 @@ console.log(students);
                 console.error('Error creating student:', error);
             });
     };
-    const groupMap = group.reduce((acc: { [x: string]: any; }, grp: { id: string | number; name: any; }) => {
+    const groupMap = groups.reduce((acc: { [x: string]: any; }, grp: { id: string | number; name: any; }) => {
         acc[grp.id] = grp.name;
         return acc;
     }, {});
@@ -381,6 +371,26 @@ console.log(students);
                         <TextField type='tel' maxRows={13} label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} fullWidth />
                         <TextField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth />
                         <TextField label="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} fullWidth />
+                        <Button onClick={handleAddStudentGroupModalOpen}>Group Name</Button>
+                        <Typography variant="subtitle1">
+                            Group Name: {groups.find((group: any) => group.id === selectedGroup)?.name}
+                        </Typography>
+                        <Button onClick={handleAddStudentRoomModalOpen}>Select Room</Button>
+                        <Typography variant="subtitle1">
+                            Selected Room: {rooms.find(room => room.id === selectedRoom)?.name}
+                        </Typography>
+                        <Button variant="contained" color="primary" onClick={handleAddStudent} disabled={!phone || !password || !firstName || !selectedRoom || students.length >= 6}>
+                            Add Student
+                        </Button>
+                    </Box>
+                </Box>
+            </Modal>
+            <Modal open={addStudentGroupModalOpen} onClose={handleAddStudentGroupModalClose}>
+                <Box sx={modalStyle}>
+                    <Typography variant="h6" component="h2">
+                        Select Room
+                    </Typography>
+                    <Box sx={{ mt: 2 }}>
                         <FormControl fullWidth variant="outlined" margin="normal">
                             <InputLabel id="group-label-add-student">Guruhni tanlang</InputLabel>
                             <Select
@@ -390,17 +400,13 @@ console.log(students);
                                 onChange={e => setSelectedGroup(e.target.value)}
                                 label="Guruhni tanlang"
                             >
-                                {group.map((item: any) => (
+                                {groups.map((item: any) => (
                                     <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
-                        <Button onClick={handleAddStudentRoomModalOpen}>Select Room</Button>
-                        <Typography variant="subtitle1">
-                            Selected Room: {rooms.find(room => room.id === selectedRoom)?.name}
-                        </Typography>
-                        <Button variant="contained" color="primary" onClick={handleAddStudent} disabled={!phone || !password || !firstName || !selectedRoom || students.length >= 6}>
-                            Add Student
+                        <Button variant="contained" color="primary" onClick={handleAddStudentGroupModalClose} sx={{ mt: 2 }}>
+                            Done
                         </Button>
                     </Box>
                 </Box>
@@ -420,7 +426,7 @@ console.log(students);
                                 onChange={(e) => setSelectedFloorForApartment(e.target.value)}
                             >
                                 {floors.map(floor => (
-                                    <MenuItem key={floor.id}>
+                                    <MenuItem key={floor.id} value={floor.id}>
                                         {floor.name}
                                     </MenuItem>
                                 ))}
@@ -486,14 +492,14 @@ console.log(students);
                                 onChange={e => setSelectedGroup(e.target.value)}
                                 label="Guruhni tanlang"
                             >
-                                {group.map((item: any) => (
+                                {groups.map((item: any) => (
                                     <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
                     </Box>
                     <Box sx={{ mt: 2 }}>
-                        <Button disabled={!phone || !password || !firstName || !selectedRoom || students.length >= 6} variant="contained" color="primary" onClick={handleAddStudent}>Add Student</Button>
+                        <Button disabled={!phone || !password || !firstName || !selectedRoom || !selectedGroup || students.length >= 6} variant="contained" color="primary" onClick={handleAddStudent}>Add Student</Button>
                     </Box>
                 </Box>
             </Modal>
