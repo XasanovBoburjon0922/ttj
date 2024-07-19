@@ -73,7 +73,7 @@ function CreateGroup() {
 
     const fetchEmployees = async () => {
         try {
-            const response = await axios.get('https://nbtuit.pythonanywhere.com/api/v1/users/employees/');
+            const response = await axios.get('https://nbtuit.pythonanywhere.com/api/v1/auth/employees/');
             setEmployees(response.data);
         } catch (error: any) {
             setError(error.message);
