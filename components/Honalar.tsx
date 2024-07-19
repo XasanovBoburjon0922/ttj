@@ -7,6 +7,14 @@ interface Props {
     students: any[];
     setStudents: React.Dispatch<React.SetStateAction<any[]>>;
 }
+const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 const Attendance: React.FC<Props> = ({ students, setStudents }) => {
     const [selectedFloor, setSelectedFloor] = useState<any | null>(null);
     const [selectedRoom, setSelectedRoom] = useState<any | null>(null);
@@ -73,7 +81,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
                 .then(response => setStudents(response.data))
                 .catch(error => console.error('Error fetching students:', error));
 
-            axios.get(`https://nbtuit.pythonanywhere.com/api/v1/common/attendance/date/`)
+                axios.get(`https://nbtuit.pythonanywhere.com/api/v1/common/attendance/date/?apartment=${selectedRoom}&date=${getCurrentDate()}`)
                 .then(response => {
                     const attendanceData: { student: string; id: string; }[] = response.data; // Adjust type according to your API response
                     const newAttendanceIdMap: Record<string, string> = {};
