@@ -47,7 +47,7 @@ const Attendance: React.FC<Props> = ({ students, setStudents }) => {
     }, []);
 
     useEffect(() => {
-        axios.get('http://nbtuit.pythonanywhere.com/api/v1/common/group/list/')
+        axios.get('https://nbtuit.pythonanywhere.com/api/v1/common/group/list/')
             .then(response => {
                 setGroups(response.data.results); // Assuming response.data is an array of groups
             })
